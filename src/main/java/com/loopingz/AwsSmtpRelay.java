@@ -25,14 +25,6 @@ public class AwsSmtpRelay implements SimpleMessageListener {
     private static CommandLine cmd;
     private static AmazonSimpleEmailService client;
 
-    static {
-        if (cmd.hasOption("r")) {
-            client = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(cmd.getOptionValue("r")).build();
-        } else {
-            client = AmazonSimpleEmailServiceClientBuilder.standard().build();
-        }
-    }
-
     AwsSmtpRelay() {
 
     }
@@ -106,6 +98,11 @@ public class AwsSmtpRelay implements SimpleMessageListener {
                 // Should display version here
                 formatter.printHelp("aws-smtp-relay", options);
                 return;
+            }
+            if (cmd.hasOption("r")) {
+                client = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(cmd.getOptionValue("r")).build();
+            } else {
+                client = AmazonSimpleEmailServiceClientBuilder.standard().build();
             }
             AwsSmtpRelay server = new AwsSmtpRelay();
             server.run();
