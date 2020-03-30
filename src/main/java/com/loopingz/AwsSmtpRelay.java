@@ -23,6 +23,15 @@ import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
 public class AwsSmtpRelay implements SimpleMessageListener {
 
     private static CommandLine cmd;
+    private static AmazonSimpleEmailService client;
+
+    static {
+        if (cmd.hasOption("r")) {
+            client = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(cmd.getOptionValue("r")).build();
+        } else {
+            client = AmazonSimpleEmailServiceClientBuilder.standard().build();
+        }
+    }
 
     AwsSmtpRelay() {
 
@@ -33,12 +42,6 @@ public class AwsSmtpRelay implements SimpleMessageListener {
     }
 
     public void deliver(String from, String to, InputStream inputStream) throws IOException {
-        AmazonSimpleEmailService client;
-        if (cmd.hasOption("r")) {
-            client = AmazonSimpleEmailServiceClientBuilder.standard().withRegion(cmd.getOptionValue("r")).build();
-        } else {
-            client = AmazonSimpleEmailServiceClientBuilder.standard().build();
-        }
         byte[] msg = IOUtils.toByteArray(inputStream);
         RawMessage rawMessage =
                 new RawMessage(ByteBuffer.wrap(msg));
@@ -66,6 +69,8 @@ public class AwsSmtpRelay implements SimpleMessageListener {
             } else {
                 throw new RejectException(451, e.getMessage());
             }
+        } finally {
+            inputStream.close();
         }
     }
 
